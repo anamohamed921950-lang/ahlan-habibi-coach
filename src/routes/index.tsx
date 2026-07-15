@@ -50,10 +50,16 @@ function Home() {
     const cached = plans[todayKey];
     if (cached) { setPlan(cached); return; }
     setLoadingPlan(true);
+    const controller = new AbortController();
+    // Never let the home screen spin forever: if the AI call hasn't
+    // answered within 10s (rate limit, no credits, network issue, etc.),
+    // abort it and fall back to a default plan instead of hanging.
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
     fetch("/api/daily-coach", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ lang, profile, phase: "morning" }),
+      signal: controller.signal,
     })
       .then(async (r) => (r.ok ? ((await r.json()) as Plan) : (lang === "ar" ? FALLBACK_AR : FALLBACK_EN)))
       .then((p) => {
@@ -62,7 +68,10 @@ function Home() {
         savePlan({ ...full, date: todayKey });
       })
       .catch(() => setPlan(lang === "ar" ? FALLBACK_AR : FALLBACK_EN))
-      .finally(() => setLoadingPlan(false));
+      .finally(() => {
+        clearTimeout(timeoutId);
+        setLoadingPlan(false);
+      });
   }, [profile, lang, todayKey]); // eslint-disable-line
 
   if (!profile) return null;
