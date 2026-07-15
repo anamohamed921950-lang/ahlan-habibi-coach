@@ -2,32 +2,160 @@ import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { useApp } from "@/lib/store";
+import type { WeekDayPlan } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { RingScore } from "@/components/RingScore";
 import { lifestyleScore, level, xpToNext, healthAge } from "@/lib/health";
-import { Flame, Sparkles, Droplet, Footprints, Quote, HeartHandshake, Star, Loader2 } from "lucide-react";
+import {
+  Flame,
+  Sparkles,
+  Droplet,
+  Footprints,
+  Quote,
+  HeartHandshake,
+  Star,
+  Loader2,
+  CalendarDays,
+} from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: Home });
 
 type Plan = {
-  mission: string; quote: string; tinyHabit: string;
-  walkMinutes: number; waterCups: number; affirmation: string;
+  mission: string;
+  quote: string;
+  tinyHabit: string;
+  walkMinutes: number;
+  waterCups: number;
+  affirmation: string;
 };
 
 const FALLBACK_AR: Plan = {
   mission: "امشي ١٥ دقيقة بعد الغداء 🌿",
   quote: "صحتك رحلة، وكل خطوة صغيرة تُحسب.",
   tinyHabit: "كوب ماء قبل كل وجبة",
-  walkMinutes: 15, waterCups: 8,
+  walkMinutes: 15,
+  waterCups: 8,
   affirmation: "أنتِ تبنين نسخة أفضل من نفسك، خطوة بخطوة.",
 };
 const FALLBACK_EN: Plan = {
   mission: "A gentle 15-minute walk after lunch 🌿",
   quote: "Health is a journey — every small step counts.",
   tinyHabit: "A glass of water before each meal",
-  walkMinutes: 15, waterCups: 8,
+  walkMinutes: 15,
+  waterCups: 8,
   affirmation: "You are building a stronger version of yourself, step by step.",
 };
+
+const FALLBACK_WEEK_AR: WeekDayPlan[] = [
+  {
+    day: "السبت",
+    mission: "امشي ١٠ دقائق بعد أي وجبة",
+    tinyHabit: "كوب ماء عند الاستيقاظ",
+    walkMinutes: 10,
+    waterCups: 6,
+  },
+  {
+    day: "الأحد",
+    mission: "أضيفي طبق خضار لوجبة واحدة",
+    tinyHabit: "٥ دقائق تنفس هادئ",
+    walkMinutes: 15,
+    waterCups: 8,
+  },
+  {
+    day: "الاثنين",
+    mission: "نامي ٣٠ دقيقة أبكر الليلة",
+    tinyHabit: "بدون شاشة قبل النوم بساعة",
+    walkMinutes: 15,
+    waterCups: 8,
+  },
+  {
+    day: "الثلاثاء",
+    mission: "امشي ٢٠ دقيقة اليوم",
+    tinyHabit: "وجبة غنية بالبروتين",
+    walkMinutes: 20,
+    waterCups: 8,
+  },
+  {
+    day: "الأربعاء",
+    mission: "يوم راحة لطيف، حركة خفيفة فقط",
+    tinyHabit: "اتصلي بصديقة تحبينها",
+    walkMinutes: 10,
+    waterCups: 7,
+  },
+  {
+    day: "الخميس",
+    mission: "جربي وجبة صحية جديدة",
+    tinyHabit: "دوّني ٣ أشياء ممتنة لها",
+    walkMinutes: 15,
+    waterCups: 8,
+  },
+  {
+    day: "الجمعة",
+    mission: "احتفلي بإنجازات أسبوعك",
+    tinyHabit: "خططي لأسبوع جديد بلطف",
+    walkMinutes: 15,
+    waterCups: 8,
+  },
+];
+const FALLBACK_WEEK_EN: WeekDayPlan[] = [
+  {
+    day: "Mon",
+    mission: "A gentle 10-minute walk after any meal",
+    tinyHabit: "One glass of water on waking",
+    walkMinutes: 10,
+    waterCups: 6,
+  },
+  {
+    day: "Tue",
+    mission: "Add one veggie-rich plate today",
+    tinyHabit: "5 minutes of calm breathing",
+    walkMinutes: 15,
+    waterCups: 8,
+  },
+  {
+    day: "Wed",
+    mission: "Sleep 30 minutes earlier tonight",
+    tinyHabit: "No screens 1 hour before bed",
+    walkMinutes: 15,
+    waterCups: 8,
+  },
+  {
+    day: "Thu",
+    mission: "A 20-minute walk today",
+    tinyHabit: "One protein-rich meal",
+    walkMinutes: 20,
+    waterCups: 8,
+  },
+  {
+    day: "Fri",
+    mission: "A gentle rest day, light movement only",
+    tinyHabit: "Call a friend you love",
+    walkMinutes: 10,
+    waterCups: 7,
+  },
+  {
+    day: "Sat",
+    mission: "Try one new healthy recipe",
+    tinyHabit: "Write down 3 things you're grateful for",
+    walkMinutes: 15,
+    waterCups: 8,
+  },
+  {
+    day: "Sun",
+    mission: "Celebrate this week's wins",
+    tinyHabit: "Gently plan the week ahead",
+    walkMinutes: 15,
+    waterCups: 8,
+  },
+];
+
+function mondayISO(d = new Date()): string {
+  const day = d.getDay();
+  const diff = (day === 0 ? -6 : 1) - day;
+  const monday = new Date(d);
+  monday.setDate(d.getDate() + diff);
+  return monday.toISOString().slice(0, 10);
+}
 
 function Home() {
   const nav = useNavigate();
@@ -38,17 +166,28 @@ function Home() {
   const streak = useApp((s) => s.streak);
   const plans = useApp((s) => s.plans);
   const savePlan = useApp((s) => s.savePlan);
+  const weeklyPlans = useApp((s) => s.weeklyPlans);
+  const saveWeeklyPlan = useApp((s) => s.saveWeeklyPlan);
 
-  useEffect(() => { if (!profile) nav({ to: "/onboarding" }); }, [profile, nav]);
+  useEffect(() => {
+    if (!profile) nav({ to: "/onboarding" });
+  }, [profile, nav]);
 
   const [plan, setPlan] = useState<Plan | null>(null);
   const [loadingPlan, setLoadingPlan] = useState(false);
   const todayKey = new Date().toISOString().slice(0, 10);
+  const weekKey = mondayISO();
+
+  const [week, setWeek] = useState<WeekDayPlan[] | null>(null);
+  const [loadingWeek, setLoadingWeek] = useState(false);
 
   useEffect(() => {
     if (!profile) return;
     const cached = plans[todayKey];
-    if (cached) { setPlan(cached); return; }
+    if (cached) {
+      setPlan(cached);
+      return;
+    }
     setLoadingPlan(true);
     const controller = new AbortController();
     // Never let the home screen spin forever: if the AI call hasn't
@@ -61,7 +200,9 @@ function Home() {
       body: JSON.stringify({ lang, profile, phase: "morning" }),
       signal: controller.signal,
     })
-      .then(async (r) => (r.ok ? ((await r.json()) as Plan) : (lang === "ar" ? FALLBACK_AR : FALLBACK_EN)))
+      .then(async (r) =>
+        r.ok ? ((await r.json()) as Plan) : lang === "ar" ? FALLBACK_AR : FALLBACK_EN,
+      )
       .then((p) => {
         const full = { ...(lang === "ar" ? FALLBACK_AR : FALLBACK_EN), ...p };
         setPlan(full);
@@ -73,6 +214,39 @@ function Home() {
         setLoadingPlan(false);
       });
   }, [profile, lang, todayKey]); // eslint-disable-line
+
+  useEffect(() => {
+    if (!profile) return;
+    const cached = weeklyPlans[weekKey];
+    if (cached) {
+      setWeek(cached.days);
+      return;
+    }
+    setLoadingWeek(true);
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 12000);
+    fetch("/api/weekly-coach", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ lang, profile }),
+      signal: controller.signal,
+    })
+      .then(async (r) => {
+        const fallback = lang === "ar" ? FALLBACK_WEEK_AR : FALLBACK_WEEK_EN;
+        if (!r.ok) return fallback;
+        const data = (await r.json()) as { days?: WeekDayPlan[] };
+        return data.days && data.days.length === 7 ? data.days : fallback;
+      })
+      .then((days) => {
+        setWeek(days);
+        saveWeeklyPlan({ weekStart: weekKey, days });
+      })
+      .catch(() => setWeek(lang === "ar" ? FALLBACK_WEEK_AR : FALLBACK_WEEK_EN))
+      .finally(() => {
+        clearTimeout(timeoutId);
+        setLoadingWeek(false);
+      });
+  }, [profile, lang, weekKey]); // eslint-disable-line
 
   if (!profile) return null;
 
@@ -99,13 +273,58 @@ function Home() {
             <Sparkles className="w-3.5 h-3.5" /> {t.todaysMission}
           </div>
           <p className="mt-2 font-display text-xl leading-snug">
-            {loadingPlan ? <span className="inline-flex items-center gap-2 opacity-70"><Loader2 className="w-4 h-4 animate-spin" />…</span> : plan?.mission}
+            {loadingPlan ? (
+              <span className="inline-flex items-center gap-2 opacity-70">
+                <Loader2 className="w-4 h-4 animate-spin" />…
+              </span>
+            ) : (
+              plan?.mission
+            )}
           </p>
           <div className="mt-4 flex items-center gap-3 text-xs">
-            <span className="inline-flex items-center gap-1 bg-white/15 rounded-full px-3 py-1"><Footprints className="w-3 h-3" /> <span className="num">{plan?.walkMinutes ?? 15}</span> {lang === "ar" ? "د" : "min"}</span>
-            <span className="inline-flex items-center gap-1 bg-white/15 rounded-full px-3 py-1"><Droplet className="w-3 h-3" /> <span className="num">{plan?.waterCups ?? 8}</span> {lang === "ar" ? "أكواب" : "cups"}</span>
+            <span className="inline-flex items-center gap-1 bg-white/15 rounded-full px-3 py-1">
+              <Footprints className="w-3 h-3" />{" "}
+              <span className="num">{plan?.walkMinutes ?? 15}</span> {lang === "ar" ? "د" : "min"}
+            </span>
+            <span className="inline-flex items-center gap-1 bg-white/15 rounded-full px-3 py-1">
+              <Droplet className="w-3 h-3" /> <span className="num">{plan?.waterCups ?? 8}</span>{" "}
+              {lang === "ar" ? "أكواب" : "cups"}
+            </span>
           </div>
         </div>
+      </div>
+
+      <div className="mt-4">
+        <div className="flex items-center gap-1.5 text-xs text-primary font-semibold mb-2 px-1">
+          <CalendarDays className="w-3.5 h-3.5" /> {lang === "ar" ? "خطة أسبوعك" : "Your week"}
+        </div>
+        {loadingWeek && !week ? (
+          <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
+            <Loader2 className="w-3.5 h-3.5 animate-spin" />{" "}
+            {lang === "ar" ? "جارٍ التحضير..." : "Preparing..."}
+          </div>
+        ) : (
+          <div
+            className="flex gap-2.5 overflow-x-auto pb-1 -mx-1 px-1"
+            style={{ scrollbarWidth: "none" }}
+          >
+            {week?.map((d, i) => (
+              <div key={i} className="shrink-0 w-36 rounded-2xl bg-card shadow-soft p-3">
+                <div className="text-[10px] font-semibold text-primary mb-1">{d.day}</div>
+                <p className="text-xs text-foreground leading-snug line-clamp-3">{d.mission}</p>
+                <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
+                  <span className="inline-flex items-center gap-0.5">
+                    <Footprints className="w-2.5 h-2.5" /> {d.walkMinutes}
+                    {lang === "ar" ? "د" : "m"}
+                  </span>
+                  <span className="inline-flex items-center gap-0.5">
+                    <Droplet className="w-2.5 h-2.5" /> {d.waterCups}
+                  </span>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       <div className="grid grid-cols-3 gap-3 mt-4">
