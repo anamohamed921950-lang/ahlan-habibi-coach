@@ -83,9 +83,13 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
       { name: "description", content: "A warm, evidence-based AI companion for gentle weight, diabetes prevention, energy, sleep and confidence — built for Egyptian women." },
       { name: "theme-color", content: "#FDFBF7" },
       { property: "og:title", content: "رفيقتي — Your AI Lifestyle Companion" },
-      { property: "og:description", content: "Build tiny habits, protect your heart, prevent diabetes — with a companion that never shames." },
+      { property: "og:description", content: "A warm, evidence-based AI companion for gentle weight, diabetes prevention, energy, sleep and confidence — built for Egyptian women." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
+      { name: "twitter:title", content: "رفيقتي — Your AI Lifestyle Companion" },
+      { name: "twitter:description", content: "A warm, evidence-based AI companion for gentle weight, diabetes prevention, energy, sleep and confidence — built for Egyptian women." },
+      { property: "og:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/fe754e1d-2392-41df-89d5-4f98b528c7d6/id-preview-00fc5128--0e5cf9f3-52f0-4420-ab53-419132ce6eb0.lovable.app-1784115650085.png" },
+      { name: "twitter:image", content: "https://pub-bb2e103a32db4e198524a2e9ed8f35b4.r2.dev/fe754e1d-2392-41df-89d5-4f98b528c7d6/id-preview-00fc5128--0e5cf9f3-52f0-4420-ab53-419132ce6eb0.lovable.app-1784115650085.png" },
     ],
     links: [
       {
