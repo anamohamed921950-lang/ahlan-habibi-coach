@@ -9,38 +9,181 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
+import { Route as MealRouteImport } from './routes/meal'
+import { Route as InsightsRouteImport } from './routes/insights'
+import { Route as HabitsRouteImport } from './routes/habits'
+import { Route as CoachRouteImport } from './routes/coach'
 import { Route as IndexRouteImport } from './routes/index'
+import { Route as ApiDailyCoachRouteImport } from './routes/api/daily-coach'
+import { Route as ApiChatRouteImport } from './routes/api/chat'
+import { Route as ApiAnalyzeMealRouteImport } from './routes/api/analyze-meal'
 
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const MealRoute = MealRouteImport.update({
+  id: '/meal',
+  path: '/meal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const HabitsRoute = HabitsRouteImport.update({
+  id: '/habits',
+  path: '/habits',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const CoachRoute = CoachRouteImport.update({
+  id: '/coach',
+  path: '/coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiDailyCoachRoute = ApiDailyCoachRouteImport.update({
+  id: '/api/daily-coach',
+  path: '/api/daily-coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiChatRoute = ApiChatRouteImport.update({
+  id: '/api/chat',
+  path: '/api/chat',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ApiAnalyzeMealRoute = ApiAnalyzeMealRouteImport.update({
+  id: '/api/analyze-meal',
+  path: '/api/analyze-meal',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
+  '/habits': typeof HabitsRoute
+  '/insights': typeof InsightsRoute
+  '/meal': typeof MealRoute
+  '/onboarding': typeof OnboardingRoute
+  '/api/analyze-meal': typeof ApiAnalyzeMealRoute
+  '/api/chat': typeof ApiChatRoute
+  '/api/daily-coach': typeof ApiDailyCoachRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
+  '/habits': typeof HabitsRoute
+  '/insights': typeof InsightsRoute
+  '/meal': typeof MealRoute
+  '/onboarding': typeof OnboardingRoute
+  '/api/analyze-meal': typeof ApiAnalyzeMealRoute
+  '/api/chat': typeof ApiChatRoute
+  '/api/daily-coach': typeof ApiDailyCoachRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
+  '/coach': typeof CoachRoute
+  '/habits': typeof HabitsRoute
+  '/insights': typeof InsightsRoute
+  '/meal': typeof MealRoute
+  '/onboarding': typeof OnboardingRoute
+  '/api/analyze-meal': typeof ApiAnalyzeMealRoute
+  '/api/chat': typeof ApiChatRoute
+  '/api/daily-coach': typeof ApiDailyCoachRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
-  fullPaths: '/'
+  fullPaths:
+    | '/'
+    | '/coach'
+    | '/habits'
+    | '/insights'
+    | '/meal'
+    | '/onboarding'
+    | '/api/analyze-meal'
+    | '/api/chat'
+    | '/api/daily-coach'
   fileRoutesByTo: FileRoutesByTo
-  to: '/'
-  id: '__root__' | '/'
+  to:
+    | '/'
+    | '/coach'
+    | '/habits'
+    | '/insights'
+    | '/meal'
+    | '/onboarding'
+    | '/api/analyze-meal'
+    | '/api/chat'
+    | '/api/daily-coach'
+  id:
+    | '__root__'
+    | '/'
+    | '/coach'
+    | '/habits'
+    | '/insights'
+    | '/meal'
+    | '/onboarding'
+    | '/api/analyze-meal'
+    | '/api/chat'
+    | '/api/daily-coach'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
+  CoachRoute: typeof CoachRoute
+  HabitsRoute: typeof HabitsRoute
+  InsightsRoute: typeof InsightsRoute
+  MealRoute: typeof MealRoute
+  OnboardingRoute: typeof OnboardingRoute
+  ApiAnalyzeMealRoute: typeof ApiAnalyzeMealRoute
+  ApiChatRoute: typeof ApiChatRoute
+  ApiDailyCoachRoute: typeof ApiDailyCoachRoute
 }
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/meal': {
+      id: '/meal'
+      path: '/meal'
+      fullPath: '/meal'
+      preLoaderRoute: typeof MealRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/habits': {
+      id: '/habits'
+      path: '/habits'
+      fullPath: '/habits'
+      preLoaderRoute: typeof HabitsRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/coach': {
+      id: '/coach'
+      path: '/coach'
+      fullPath: '/coach'
+      preLoaderRoute: typeof CoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/': {
       id: '/'
       path: '/'
@@ -48,11 +191,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof IndexRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/api/daily-coach': {
+      id: '/api/daily-coach'
+      path: '/api/daily-coach'
+      fullPath: '/api/daily-coach'
+      preLoaderRoute: typeof ApiDailyCoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/chat': {
+      id: '/api/chat'
+      path: '/api/chat'
+      fullPath: '/api/chat'
+      preLoaderRoute: typeof ApiChatRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/api/analyze-meal': {
+      id: '/api/analyze-meal'
+      path: '/api/analyze-meal'
+      fullPath: '/api/analyze-meal'
+      preLoaderRoute: typeof ApiAnalyzeMealRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
+  CoachRoute: CoachRoute,
+  HabitsRoute: HabitsRoute,
+  InsightsRoute: InsightsRoute,
+  MealRoute: MealRoute,
+  OnboardingRoute: OnboardingRoute,
+  ApiAnalyzeMealRoute: ApiAnalyzeMealRoute,
+  ApiChatRoute: ApiChatRoute,
+  ApiDailyCoachRoute: ApiDailyCoachRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

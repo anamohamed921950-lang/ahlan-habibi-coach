@@ -1,0 +1,10 @@
+# Companion — AI Lifestyle Companion
+
+> A warm, evidence-based AI health companion for gentle weight, diabetes prevention, energy, sleep and confidence. Arabic-first, built for Egyptian women.
+
+## Pages
+- [Home](/): Today's mission, scores, tiny habit
+- [Habits](/habits): Log water, steps, sleep, nutrition, movement
+- [Coach](/coach): Chat with the AI health companion
+- [Meal](/meal): AI meal photo reflection
+- [Progress](/insights): Lifestyle score, health age, heart & diabetes prevention
