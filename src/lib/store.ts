@@ -64,10 +64,25 @@ type State = {
 
 const todayISO = () => new Date().toISOString().slice(0, 10);
 
-const emptyLog = (date: string): DailyLog => ({
-  date, waterCups: 0, steps: 0, sleepHours: 0, mood: 3, energy: 3,
-  proteins: false, veggies: false, fruit: false, exercise: false, meditation: false,
-});
+// IMPORTANT: this must return the SAME object reference for the same date
+// across repeated calls. Returning a brand-new object every time (as the
+// original code did) makes React's store subscription think the data
+// changed on every read, causing an infinite re-render loop and crashing
+// the app with "Maximum update depth exceeded" (React error #185) — this
+// is exactly what happened right after onboarding for new users who don't
+// have a log entry for today yet.
+let cachedEmptyLogDate: string | null = null;
+let cachedEmptyLog: DailyLog | null = null;
+
+const emptyLog = (date: string): DailyLog => {
+  if (cachedEmptyLogDate === date && cachedEmptyLog) return cachedEmptyLog;
+  cachedEmptyLog = {
+    date, waterCups: 0, steps: 0, sleepHours: 0, mood: 3, energy: 3,
+    proteins: false, veggies: false, fruit: false, exercise: false, meditation: false,
+  };
+  cachedEmptyLogDate = date;
+  return cachedEmptyLog;
+};
 
 export const useApp = create<State>()(
   persist(
