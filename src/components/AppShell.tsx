@@ -1,5 +1,13 @@
 import { Link, useRouterState } from "@tanstack/react-router";
-import { Home, Sparkles, MessageCircleHeart, Camera, TrendingUp, Languages } from "lucide-react";
+import {
+  Home,
+  Sparkles,
+  MessageCircleHeart,
+  Camera,
+  TrendingUp,
+  Languages,
+  UserCog,
+} from "lucide-react";
 import { useT, useLang } from "@/lib/i18n";
 import type { ReactNode } from "react";
 
@@ -21,14 +29,23 @@ export function AppShell({ children }: { children: ReactNode }) {
       <header className="sticky top-0 z-20 backdrop-blur-md bg-background/70 border-b border-border/50">
         <div className="mx-auto max-w-md px-5 py-3 flex items-center justify-between">
           <div className="font-display text-xl text-primary">{t.appName}</div>
-          <button
-            onClick={() => setLang(lang === "ar" ? "en" : "ar")}
-            className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors rounded-full px-3 py-1.5 bg-secondary/50"
-            aria-label="Toggle language"
-          >
-            <Languages className="w-3.5 h-3.5" />
-            {lang === "ar" ? "EN" : "ع"}
-          </button>
+          <div className="flex items-center gap-2">
+            <Link
+              to="/profile"
+              className="inline-flex items-center justify-center w-8 h-8 rounded-full text-muted-foreground hover:text-primary transition-colors bg-secondary/50"
+              aria-label="Edit profile"
+            >
+              <UserCog className="w-4 h-4" />
+            </Link>
+            <button
+              onClick={() => setLang(lang === "ar" ? "en" : "ar")}
+              className="inline-flex items-center gap-1.5 text-xs text-muted-foreground hover:text-primary transition-colors rounded-full px-3 py-1.5 bg-secondary/50"
+              aria-label="Toggle language"
+            >
+              <Languages className="w-3.5 h-3.5" />
+              {lang === "ar" ? "EN" : "ع"}
+            </button>
+          </div>
         </div>
       </header>
 
@@ -46,7 +63,9 @@ export function AppShell({ children }: { children: ReactNode }) {
                   active ? "text-primary" : "text-muted-foreground"
                 }`}
               >
-                <div className={`p-1.5 rounded-xl transition-all ${active ? "bg-gradient-primary shadow-glow text-primary-foreground" : ""}`}>
+                <div
+                  className={`p-1.5 rounded-xl transition-all ${active ? "bg-gradient-primary shadow-glow text-primary-foreground" : ""}`}
+                >
                   <Icon className="w-5 h-5" strokeWidth={active ? 2.2 : 1.7} />
                 </div>
                 <span className="text-[10px] font-medium">{label}</span>
