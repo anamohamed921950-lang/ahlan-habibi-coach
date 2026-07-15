@@ -14,7 +14,10 @@ function Onboarding() {
   const nav = useNavigate();
   const setProfile = useApp((s) => s.setProfile);
   const [step, setStep] = useState(0);
-  const [f, setF] = useState({
+  const [f, setF] = useState<{
+    name: string; age: number; heightCm: number; weightKg: number; waistCm: number;
+    goal: string; activity: number; foods: string; motivation: number;
+  }>({
     name: "", age: 40, heightCm: 165, weightKg: 85, waistCm: 95,
     goal: t.onboarding.goals[0], activity: 1, foods: "", motivation: 7,
   });
