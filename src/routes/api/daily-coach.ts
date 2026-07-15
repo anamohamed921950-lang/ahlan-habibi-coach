@@ -20,19 +20,26 @@ export const Route = createFileRoute("/api/daily-coach")({
             ? `اكتبي تأمل مسائي بـ JSON: {"mission":"استعداد للنوم","quote":"...","tinyHabit":"...","walkMinutes":0,"waterCups":0,"affirmation":"..."}`
             : `Evening reflection JSON: {"mission":"wind down","quote":"...","tinyHabit":"...","walkMinutes":0,"waterCups":0,"affirmation":"..."}`);
 
-        const upstream = await chatCompletion({
-          model: "google/gemini-2.5-flash",
-          messages: [
-            { role: "system", content: sys },
-            { role: "user", content: userMsg },
-          ],
-          response_format: { type: "json_object" },
-        });
+        try {
+          const upstream = await chatCompletion({
+            model: "google/gemini-2.5-flash",
+            messages: [
+              { role: "system", content: sys },
+              { role: "user", content: userMsg },
+            ],
+            response_format: { type: "json_object" },
+          });
 
-        if (!upstream.ok) return gatewayError(upstream.status, await upstream.text());
-        const data = (await upstream.json()) as { choices?: { message?: { content?: string } }[] };
-        const raw = data.choices?.[0]?.message?.content ?? "{}";
-        return new Response(raw, { headers: { "Content-Type": "application/json" } });
+          if (!upstream.ok) return gatewayError(upstream.status, await upstream.text());
+          const data = (await upstream.json()) as { choices?: { message?: { content?: string } }[] };
+          const raw = data.choices?.[0]?.message?.content ?? "{}";
+          return new Response(raw, { headers: { "Content-Type": "application/json" } });
+        } catch (err) {
+          // Missing LOVABLE_API_KEY, network error, etc. Fail fast with a
+          // normal error response so the client falls back instead of hanging.
+          console.error("daily-coach failed:", err);
+          return gatewayError(503, "AI coach is temporarily unavailable.");
+        }
       },
     },
   },
