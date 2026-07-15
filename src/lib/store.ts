@@ -40,12 +40,26 @@ export type DailyPlan = {
   affirmation: string;
 };
 
+export type WeekDayPlan = {
+  day: string;
+  mission: string;
+  tinyHabit: string;
+  walkMinutes: number;
+  waterCups: number;
+};
+
+export type WeeklyPlan = {
+  weekStart: string;
+  days: WeekDayPlan[];
+};
+
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 
 type State = {
   profile: Profile | null;
   logs: Record<string, DailyLog>;
   plans: Record<string, DailyPlan>;
+  weeklyPlans: Record<string, WeeklyPlan>;
   xp: number;
   streak: number;
   lastActive: string | null;
@@ -56,6 +70,7 @@ type State = {
   addXp: (n: number) => void;
   bumpStreak: () => void;
   savePlan: (p: DailyPlan) => void;
+  saveWeeklyPlan: (w: WeeklyPlan) => void;
   appendChat: (m: ChatMsg) => void;
   updateLastChat: (content: string) => void;
   resetChat: () => void;
@@ -77,8 +92,17 @@ let cachedEmptyLog: DailyLog | null = null;
 const emptyLog = (date: string): DailyLog => {
   if (cachedEmptyLogDate === date && cachedEmptyLog) return cachedEmptyLog;
   cachedEmptyLog = {
-    date, waterCups: 0, steps: 0, sleepHours: 0, mood: 3, energy: 3,
-    proteins: false, veggies: false, fruit: false, exercise: false, meditation: false,
+    date,
+    waterCups: 0,
+    steps: 0,
+    sleepHours: 0,
+    mood: 3,
+    energy: 3,
+    proteins: false,
+    veggies: false,
+    fruit: false,
+    exercise: false,
+    meditation: false,
   };
   cachedEmptyLogDate = date;
   return cachedEmptyLog;
@@ -90,6 +114,7 @@ export const useApp = create<State>()(
       profile: null,
       logs: {},
       plans: {},
+      weeklyPlans: {},
       xp: 0,
       streak: 0,
       lastActive: null,
@@ -113,6 +138,7 @@ export const useApp = create<State>()(
         set({ streak: last === yesterday ? get().streak + 1 : 1, lastActive: d });
       },
       savePlan: (p) => set({ plans: { ...get().plans, [p.date]: p } }),
+      saveWeeklyPlan: (w) => set({ weeklyPlans: { ...get().weeklyPlans, [w.weekStart]: w } }),
       appendChat: (m) => set({ chat: [...get().chat, m] }),
       updateLastChat: (content) => {
         const chat = [...get().chat];
@@ -122,7 +148,17 @@ export const useApp = create<State>()(
         }
       },
       resetChat: () => set({ chat: [] }),
-      reset: () => set({ profile: null, logs: {}, plans: {}, xp: 0, streak: 0, lastActive: null, chat: [] }),
+      reset: () =>
+        set({
+          profile: null,
+          logs: {},
+          plans: {},
+          weeklyPlans: {},
+          xp: 0,
+          streak: 0,
+          lastActive: null,
+          chat: [],
+        }),
     }),
     { name: "lc-app" },
   ),
