@@ -28,18 +28,23 @@ export const Route = createFileRoute("/api/chat")({
         const sys = lang === "ar" ? SYSTEM_AR : SYSTEM_EN;
         const ctx = profile ? `\n\nUser profile: ${JSON.stringify(profile)}` : "";
 
-        const upstream = await chatCompletion({
-          model: "google/gemini-2.5-flash",
-          stream: true,
-          messages: [{ role: "system", content: sys + ctx }, ...messages],
-        });
+        try {
+          const upstream = await chatCompletion({
+            model: "google/gemini-2.5-flash",
+            stream: true,
+            messages: [{ role: "system", content: sys + ctx }, ...messages],
+          });
 
-        if (!upstream.ok || !upstream.body) {
-          return gatewayError(upstream.status, await upstream.text());
+          if (!upstream.ok || !upstream.body) {
+            return gatewayError(upstream.status, await upstream.text());
+          }
+          return new Response(upstream.body, {
+            headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
+          });
+        } catch (err) {
+          console.error("chat failed:", err);
+          return gatewayError(503, "Coach chat is temporarily unavailable.");
         }
-        return new Response(upstream.body, {
-          headers: { "Content-Type": "text/event-stream", "Cache-Control": "no-cache" },
-        });
       },
     },
   },
