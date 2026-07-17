@@ -45,39 +45,28 @@ export function diabetesPreventionScore(log: DailyLog, p: Profile | null): numbe
   return Math.round(Math.max(0, Math.min(s, 100)));
 }
 
-export function healthAge(p: Profile | null, life: number): number {
-  if (!p) return 0;
+// Wellness trend across the last 7 days of logs. Honest, evidence-informed,
+// not a fake "health age". Returns one of three states + the average.
+export type WellnessTrend = "improving" | "steady" | "care";
 
-  // This is a motivational ESTIMATE, not a medical measurement. It's built
-  // from widely-used risk indicators so the number actually means something,
-  // instead of an arbitrary formula:
-  //   - BMI category (underweight / normal / overweight / obese)
-  //   - Waist circumference (central fat is a stronger risk signal than BMI alone;
-  //     ~88cm is the commonly used higher-risk threshold for women)
-  //   - Activity level from onboarding
-  //   - Today's lifestyle score (water, steps, sleep, food, exercise, mood)
-
-  const b = bmi(p);
-  let bmiAdj = 0;
-  if (b < 18.5) bmiAdj = 1;
-  else if (b < 25) bmiAdj = -1.5;
-  else if (b < 30) bmiAdj = 2;
-  else if (b < 35) bmiAdj = 4.5;
-  else bmiAdj = 7;
-
-  let waistAdj = 0;
-  if (p.waistCm >= 88) waistAdj = 2;
-  else if (p.waistCm >= 80) waistAdj = 0.5;
-
-  const activityAdjByLevel = [3, 1.5, 0, -2];
-  const activityAdj = activityAdjByLevel[Math.min(Math.max(p.activity, 0), 3)];
-
-  // Lifestyle score is 0-100, 50 treated as neutral; capped so one rough day
-  // (or one great day) can't swing the number wildly.
-  const lifestyleAdj = Math.max(-5, Math.min(5, (50 - life) / 10));
-
-  const delta = Math.max(-10, Math.min(10, bmiAdj + waistAdj + activityAdj + lifestyleAdj));
-  return Math.max(18, Math.round(p.age + delta));
+export function wellnessTrend(logs: Record<string, DailyLog>): {
+  trend: WellnessTrend;
+  avg: number;
+  days: number;
+} {
+  const keys = Object.keys(logs).sort().slice(-7);
+  if (keys.length === 0) return { trend: "steady", avg: 0, days: 0 };
+  const scores = keys.map((k) => lifestyleScore(logs[k]));
+  const avg = scores.reduce((a, b) => a + b, 0) / scores.length;
+  const firstHalf = scores.slice(0, Math.max(1, Math.floor(scores.length / 2)));
+  const secondHalf = scores.slice(-Math.max(1, Math.floor(scores.length / 2)));
+  const firstAvg = firstHalf.reduce((a, b) => a + b, 0) / firstHalf.length;
+  const secondAvg = secondHalf.reduce((a, b) => a + b, 0) / secondHalf.length;
+  const delta = secondAvg - firstAvg;
+  let trend: WellnessTrend = "steady";
+  if (delta > 4 || avg >= 65) trend = "improving";
+  else if (avg < 35) trend = "care";
+  return { trend, avg: Math.round(avg), days: keys.length };
 }
 
 export function level(xp: number): number {

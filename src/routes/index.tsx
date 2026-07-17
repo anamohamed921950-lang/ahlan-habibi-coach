@@ -1,21 +1,22 @@
-import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { AppShell } from "@/components/AppShell";
 import { useApp } from "@/lib/store";
 import type { WeekDayPlan } from "@/lib/store";
 import { useT } from "@/lib/i18n";
-import { RingScore } from "@/components/RingScore";
-import { lifestyleScore, level, xpToNext, healthAge } from "@/lib/health";
+import { lifestyleScore, level, xpToNext } from "@/lib/health";
 import {
   Flame,
-  Sparkles,
   Droplet,
   Footprints,
-  Quote,
-  HeartHandshake,
-  Star,
+  ArrowRight,
   Loader2,
-  CalendarDays,
+  Camera,
+  MessageCircleHeart,
+  Sparkles,
+  Moon,
+  Salad,
+  Sun,
 } from "lucide-react";
 
 export const Route = createFileRoute("/")({ component: Home });
@@ -46,109 +47,6 @@ const FALLBACK_EN: Plan = {
   affirmation: "You are building a stronger version of yourself, step by step.",
 };
 
-const FALLBACK_WEEK_AR: WeekDayPlan[] = [
-  {
-    day: "السبت",
-    mission: "امشي ١٠ دقائق بعد أي وجبة",
-    tinyHabit: "كوب ماء عند الاستيقاظ",
-    walkMinutes: 10,
-    waterCups: 6,
-  },
-  {
-    day: "الأحد",
-    mission: "أضيفي طبق خضار لوجبة واحدة",
-    tinyHabit: "٥ دقائق تنفس هادئ",
-    walkMinutes: 15,
-    waterCups: 8,
-  },
-  {
-    day: "الاثنين",
-    mission: "نامي ٣٠ دقيقة أبكر الليلة",
-    tinyHabit: "بدون شاشة قبل النوم بساعة",
-    walkMinutes: 15,
-    waterCups: 8,
-  },
-  {
-    day: "الثلاثاء",
-    mission: "امشي ٢٠ دقيقة اليوم",
-    tinyHabit: "وجبة غنية بالبروتين",
-    walkMinutes: 20,
-    waterCups: 8,
-  },
-  {
-    day: "الأربعاء",
-    mission: "يوم راحة لطيف، حركة خفيفة فقط",
-    tinyHabit: "اتصلي بصديقة تحبينها",
-    walkMinutes: 10,
-    waterCups: 7,
-  },
-  {
-    day: "الخميس",
-    mission: "جربي وجبة صحية جديدة",
-    tinyHabit: "دوّني ٣ أشياء ممتنة لها",
-    walkMinutes: 15,
-    waterCups: 8,
-  },
-  {
-    day: "الجمعة",
-    mission: "احتفلي بإنجازات أسبوعك",
-    tinyHabit: "خططي لأسبوع جديد بلطف",
-    walkMinutes: 15,
-    waterCups: 8,
-  },
-];
-const FALLBACK_WEEK_EN: WeekDayPlan[] = [
-  {
-    day: "Mon",
-    mission: "A gentle 10-minute walk after any meal",
-    tinyHabit: "One glass of water on waking",
-    walkMinutes: 10,
-    waterCups: 6,
-  },
-  {
-    day: "Tue",
-    mission: "Add one veggie-rich plate today",
-    tinyHabit: "5 minutes of calm breathing",
-    walkMinutes: 15,
-    waterCups: 8,
-  },
-  {
-    day: "Wed",
-    mission: "Sleep 30 minutes earlier tonight",
-    tinyHabit: "No screens 1 hour before bed",
-    walkMinutes: 15,
-    waterCups: 8,
-  },
-  {
-    day: "Thu",
-    mission: "A 20-minute walk today",
-    tinyHabit: "One protein-rich meal",
-    walkMinutes: 20,
-    waterCups: 8,
-  },
-  {
-    day: "Fri",
-    mission: "A gentle rest day, light movement only",
-    tinyHabit: "Call a friend you love",
-    walkMinutes: 10,
-    waterCups: 7,
-  },
-  {
-    day: "Sat",
-    mission: "Try one new healthy recipe",
-    tinyHabit: "Write down 3 things you're grateful for",
-    walkMinutes: 15,
-    waterCups: 8,
-  },
-  {
-    day: "Sun",
-    mission: "Celebrate this week's wins",
-    tinyHabit: "Gently plan the week ahead",
-    walkMinutes: 15,
-    waterCups: 8,
-  },
-];
-
 function mondayISO(d = new Date()): string {
   const day = d.getDay();
   const diff = (day === 0 ? -6 : 1) - day;
@@ -167,7 +65,6 @@ function Home() {
   const plans = useApp((s) => s.plans);
   const savePlan = useApp((s) => s.savePlan);
   const weeklyPlans = useApp((s) => s.weeklyPlans);
-  const saveWeeklyPlan = useApp((s) => s.saveWeeklyPlan);
 
   useEffect(() => {
     if (!profile) nav({ to: "/onboarding" });
@@ -177,9 +74,7 @@ function Home() {
   const [loadingPlan, setLoadingPlan] = useState(false);
   const todayKey = new Date().toISOString().slice(0, 10);
   const weekKey = mondayISO();
-
-  const [week, setWeek] = useState<WeekDayPlan[] | null>(null);
-  const [loadingWeek, setLoadingWeek] = useState(false);
+  const week: WeekDayPlan[] | null = weeklyPlans[weekKey]?.days ?? null;
 
   useEffect(() => {
     if (!profile) return;
@@ -190,9 +85,6 @@ function Home() {
     }
     setLoadingPlan(true);
     const controller = new AbortController();
-    // Never let the home screen spin forever: if the AI call hasn't
-    // answered within 10s (rate limit, no credits, network issue, etc.),
-    // abort it and fall back to a default plan instead of hanging.
     const timeoutId = setTimeout(() => controller.abort(), 10000);
     fetch("/api/daily-coach", {
       method: "POST",
@@ -215,157 +107,193 @@ function Home() {
       });
   }, [profile, lang, todayKey]); // eslint-disable-line
 
-  useEffect(() => {
-    if (!profile) return;
-    const cached = weeklyPlans[weekKey];
-    if (cached) {
-      setWeek(cached.days);
-      return;
-    }
-    setLoadingWeek(true);
-    const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 12000);
-    fetch("/api/weekly-coach", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lang, profile }),
-      signal: controller.signal,
-    })
-      .then(async (r) => {
-        const fallback = lang === "ar" ? FALLBACK_WEEK_AR : FALLBACK_WEEK_EN;
-        if (!r.ok) return fallback;
-        const data = (await r.json()) as { days?: WeekDayPlan[] };
-        return data.days && data.days.length === 7 ? data.days : fallback;
-      })
-      .then((days) => {
-        setWeek(days);
-        saveWeeklyPlan({ weekStart: weekKey, days });
-      })
-      .catch(() => setWeek(lang === "ar" ? FALLBACK_WEEK_AR : FALLBACK_WEEK_EN))
-      .finally(() => {
-        clearTimeout(timeoutId);
-        setLoadingWeek(false);
-      });
-  }, [profile, lang, weekKey]); // eslint-disable-line
-
   if (!profile) return null;
 
-  const hour = new Date().getHours();
-  const greeting = hour < 18 ? t.goodMorning : t.goodEvening;
+  const now = new Date();
+  const hour = now.getHours();
+  const greeting = hour < 5 ? t.goodEvening : hour < 18 ? t.goodMorning : t.goodEvening;
   const life = lifestyleScore(today);
   const lv = level(xp);
   const prog = xpToNext(xp);
-  const hAge = healthAge(profile, life);
+
+  const dateStr = now.toLocaleDateString(lang === "ar" ? "ar-EG" : "en-US", {
+    weekday: "long",
+    day: "numeric",
+    month: "long",
+  });
 
   return (
     <AppShell>
-      <div className="mb-5">
-        <p className="text-xs text-muted-foreground">{greeting} ✨</p>
-        <h1 className="font-display text-3xl text-foreground mt-0.5">
-          {profile.name || (lang === "ar" ? "جميلة" : "beautiful")}
-        </h1>
+      <div className="mb-5 flex items-start justify-between animate-fade-up">
+        <div>
+          <div className="text-[11px] uppercase tracking-widest text-primary/70 font-semibold flex items-center gap-1.5">
+            {hour < 18 ? <Sun className="w-3 h-3" /> : <Moon className="w-3 h-3" />}
+            {greeting}
+          </div>
+          <h1 className="font-display text-3xl text-foreground mt-1 leading-none">
+            {profile.name || (lang === "ar" ? "جميلة" : "friend")}
+          </h1>
+          <p className="mt-1 text-xs text-muted-foreground">{dateStr}</p>
+        </div>
+        <div className="flex items-center gap-1.5 bg-card border border-border rounded-full px-3 py-1.5 shadow-soft">
+          <Flame className="w-3.5 h-3.5 text-primary" />
+          <span className="font-display text-lg text-primary num leading-none">{streak}</span>
+        </div>
       </div>
 
-      <div className="relative overflow-hidden rounded-3xl bg-gradient-primary text-primary-foreground p-5 shadow-glow">
-        <div className="absolute -top-8 -end-8 w-32 h-32 rounded-full bg-white/10 blur-2xl" />
+      <section className="relative overflow-hidden rounded-[2rem] bg-gradient-sunset text-primary-foreground p-6 shadow-glow animate-fade-up">
+        <div className="absolute -top-16 -end-16 w-56 h-56 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute bottom-0 start-0 w-full h-1/2 bg-gradient-to-t from-black/10 to-transparent" />
         <div className="relative">
-          <div className="flex items-center gap-2 text-xs opacity-80 font-medium">
+          <div className="flex items-center gap-2 text-[11px] uppercase tracking-widest opacity-90 font-semibold">
             <Sparkles className="w-3.5 h-3.5" /> {t.todaysMission}
           </div>
-          <p className="mt-2 font-display text-xl leading-snug">
+          <p className="mt-3 font-display text-[26px] leading-[1.15] text-balance">
             {loadingPlan ? (
-              <span className="inline-flex items-center gap-2 opacity-70">
-                <Loader2 className="w-4 h-4 animate-spin" />…
+              <span className="inline-flex items-center gap-2 opacity-80">
+                <Loader2 className="w-5 h-5 animate-spin" />
               </span>
             ) : (
               plan?.mission
             )}
           </p>
-          <div className="mt-4 flex items-center gap-3 text-xs">
-            <span className="inline-flex items-center gap-1 bg-white/15 rounded-full px-3 py-1">
-              <Footprints className="w-3 h-3" />{" "}
-              <span className="num">{plan?.walkMinutes ?? 15}</span> {lang === "ar" ? "د" : "min"}
-            </span>
-            <span className="inline-flex items-center gap-1 bg-white/15 rounded-full px-3 py-1">
-              <Droplet className="w-3 h-3" /> <span className="num">{plan?.waterCups ?? 8}</span>{" "}
-              {lang === "ar" ? "أكواب" : "cups"}
-            </span>
+          <div className="mt-5 flex items-center gap-2 text-xs">
+            <Pill icon={<Footprints className="w-3 h-3" />}>
+              <span className="num">{plan?.walkMinutes ?? 15}</span> {t.minutes}
+            </Pill>
+            <Pill icon={<Droplet className="w-3 h-3" />}>
+              <span className="num">{plan?.waterCups ?? 8}</span> {t.cups}
+            </Pill>
           </div>
+          {plan?.quote ? (
+            <p className="mt-5 text-sm italic opacity-90 border-t border-white/20 pt-4 leading-relaxed">
+              " {plan.quote} "
+            </p>
+          ) : null}
         </div>
-      </div>
+      </section>
 
-      <div className="mt-4">
-        <div className="flex items-center gap-1.5 text-xs text-primary font-semibold mb-2 px-1">
-          <CalendarDays className="w-3.5 h-3.5" /> {lang === "ar" ? "خطة أسبوعك" : "Your week"}
-        </div>
-        {loadingWeek && !week ? (
-          <div className="flex items-center gap-2 text-xs text-muted-foreground px-1">
-            <Loader2 className="w-3.5 h-3.5 animate-spin" />{" "}
-            {lang === "ar" ? "جارٍ التحضير..." : "Preparing..."}
+      <section className="mt-4 grid grid-cols-2 gap-3 animate-fade-up">
+        <div className="p-4 rounded-3xl bg-card border border-border shadow-soft">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[11px] uppercase tracking-widest text-muted-foreground font-semibold">
+              {t.lifestyleScore}
+            </span>
+            <span className="font-display text-2xl text-primary num">{life}</span>
           </div>
-        ) : (
-          <div
-            className="flex gap-2.5 overflow-x-auto pb-1 -mx-1 px-1"
-            style={{ scrollbarWidth: "none" }}
-          >
-            {week?.map((d, i) => (
-              <div key={i} className="shrink-0 w-36 rounded-2xl bg-card shadow-soft p-3">
-                <div className="text-[10px] font-semibold text-primary mb-1">{d.day}</div>
-                <p className="text-xs text-foreground leading-snug line-clamp-3">{d.mission}</p>
+          <div className="mt-2 h-1.5 bg-secondary/70 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-primary transition-all duration-700" style={{ width: `${life}%` }} />
+          </div>
+        </div>
+        <div className="p-4 rounded-3xl bg-card border border-border shadow-soft">
+          <div className="flex items-baseline justify-between">
+            <span className="text-[11px] uppercase tracking-widest text-muted-foreground font-semibold">
+              {t.level}
+            </span>
+            <span className="font-display text-2xl text-primary num">{lv}</span>
+          </div>
+          <div className="mt-2 h-1.5 bg-secondary/70 rounded-full overflow-hidden">
+            <div className="h-full bg-gradient-gold transition-all duration-700" style={{ width: `${prog.pct}%` }} />
+          </div>
+        </div>
+      </section>
+
+      {plan?.tinyHabit ? (
+        <section className="mt-4 p-4 rounded-3xl bg-accent/40 border border-accent/50 flex items-center gap-3 animate-fade-up">
+          <div className="w-10 h-10 rounded-full bg-gradient-gold flex items-center justify-center shrink-0 shadow-soft">
+            <Salad className="w-5 h-5 text-accent-foreground" />
+          </div>
+          <div className="flex-1">
+            <div className="text-[10px] uppercase tracking-widest text-accent-foreground/70 font-semibold">
+              {t.tinyHabit}
+            </div>
+            <p className="text-sm text-accent-foreground mt-0.5 leading-snug">{plan.tinyHabit}</p>
+          </div>
+        </section>
+      ) : null}
+
+      <section className="mt-6 animate-fade-up">
+        <div className="flex items-center justify-between mb-3 px-1">
+          <div className="text-[11px] uppercase tracking-widest text-muted-foreground font-semibold">
+            {t.weekPlan}
+          </div>
+          <Link to="/plan" className="text-xs text-primary font-semibold inline-flex items-center gap-1 hover:opacity-80">
+            {t.seeFullPlan} <ArrowRight className="w-3 h-3 rtl:rotate-180" />
+          </Link>
+        </div>
+        <div className="flex gap-2 overflow-x-auto pb-1 -mx-1 px-1" style={{ scrollbarWidth: "none" }}>
+          {(week ?? Array(7).fill(null)).map((d: WeekDayPlan | null, i: number) => (
+            <Link
+              key={i}
+              to="/plan"
+              className="shrink-0 w-32 rounded-2xl bg-card border border-border shadow-soft p-3 hover:border-primary/50 transition-colors"
+            >
+              <div className="text-[10px] font-semibold text-primary uppercase tracking-wider">
+                {d?.day ?? (lang === "ar" ? `يوم ${i + 1}` : `Day ${i + 1}`)}
+              </div>
+              <p className="text-xs text-foreground leading-snug line-clamp-3 mt-1 min-h-[3rem]">
+                {d?.mission ?? "…"}
+              </p>
+              {d ? (
                 <div className="mt-2 flex items-center gap-2 text-[10px] text-muted-foreground">
                   <span className="inline-flex items-center gap-0.5">
-                    <Footprints className="w-2.5 h-2.5" /> {d.walkMinutes}
-                    {lang === "ar" ? "د" : "m"}
+                    <Footprints className="w-2.5 h-2.5" />
+                    {d.walkMinutes}
                   </span>
                   <span className="inline-flex items-center gap-0.5">
-                    <Droplet className="w-2.5 h-2.5" /> {d.waterCups}
+                    <Droplet className="w-2.5 h-2.5" />
+                    {d.waterCups}
                   </span>
                 </div>
-              </div>
-            ))}
+              ) : null}
+            </Link>
+          ))}
+        </div>
+      </section>
+
+      <section className="mt-6 grid grid-cols-2 gap-3 animate-fade-up">
+        <Link to="/coach" className="p-4 rounded-3xl bg-card border border-border shadow-soft flex items-center gap-3 hover:border-primary/50 transition-colors">
+          <div className="w-10 h-10 rounded-full bg-gradient-primary flex items-center justify-center shrink-0">
+            <MessageCircleHeart className="w-5 h-5 text-primary-foreground" />
           </div>
-        )}
-      </div>
-
-      <div className="grid grid-cols-3 gap-3 mt-4">
-        <div className="rounded-2xl bg-card shadow-soft p-3 text-center">
-          <Flame className="w-4 h-4 text-primary mx-auto" />
-          <div className="font-display text-2xl text-foreground num mt-1">{streak}</div>
-          <div className="text-[10px] text-muted-foreground">{t.streak}</div>
-        </div>
-        <div className="rounded-2xl bg-card shadow-soft p-3 text-center">
-          <Star className="w-4 h-4 text-primary mx-auto" />
-          <div className="font-display text-2xl text-foreground num mt-1">{lv}</div>
-          <div className="text-[10px] text-muted-foreground">{t.level}</div>
-          <div className="mt-1.5 h-1 bg-secondary rounded-full overflow-hidden">
-            <div className="h-full bg-gradient-primary" style={{ width: `${prog.pct}%` }} />
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-medium text-foreground">{t.coach}</div>
+            <div className="text-[11px] text-muted-foreground truncate">
+              {lang === "ar" ? "دردشة سريعة" : "Quick chat"}
+            </div>
           </div>
-        </div>
-        <div className="rounded-2xl bg-card shadow-soft p-3 text-center">
-          <HeartHandshake className="w-4 h-4 text-primary mx-auto" />
-          <div className="font-display text-2xl text-foreground num mt-1">{hAge}</div>
-          <div className="text-[10px] text-muted-foreground">{t.healthAge}</div>
-        </div>
-      </div>
-
-      <div className="grid grid-cols-[auto_1fr] gap-4 mt-4 items-center p-4 rounded-3xl bg-card shadow-soft">
-        <RingScore value={life} label={t.lifestyleScore} size={104} />
-        <div>
-          <div className="flex items-center gap-1.5 text-xs text-primary font-semibold">
-            <Quote className="w-3 h-3" /> {t.dailyQuote}
+        </Link>
+        <Link to="/meal" className="p-4 rounded-3xl bg-card border border-border shadow-soft flex items-center gap-3 hover:border-primary/50 transition-colors">
+          <div className="w-10 h-10 rounded-full bg-gradient-teal flex items-center justify-center shrink-0">
+            <Camera className="w-5 h-5 text-primary-foreground" />
           </div>
-          <p className="mt-1 text-sm text-foreground leading-relaxed">{plan?.quote}</p>
-        </div>
-      </div>
+          <div className="flex-1 min-w-0">
+            <div className="text-sm font-medium text-foreground">{t.meal}</div>
+            <div className="text-[11px] text-muted-foreground truncate">
+              {lang === "ar" ? "صوّري وجبتك" : "Snap a meal"}
+            </div>
+          </div>
+        </Link>
+      </section>
 
-      <div className="mt-4 p-4 rounded-3xl bg-gradient-hero shadow-soft">
-        <div className="text-xs text-primary font-semibold mb-1">{t.tinyHabit}</div>
-        <p className="text-foreground">{plan?.tinyHabit}</p>
-      </div>
-
-      <div className="mt-4 mb-4 p-4 rounded-2xl bg-accent/50 text-center">
-        <p className="text-sm text-accent-foreground italic">"{plan?.affirmation}"</p>
-      </div>
+      {plan?.affirmation ? (
+        <section className="mt-6 mb-6 text-center animate-fade-up">
+          <div className="rule-gold mx-auto max-w-[200px]" />
+          <p className="mt-4 text-sm italic text-foreground/80 text-balance px-4">
+            {plan.affirmation}
+          </p>
+          <div className="rule-gold mx-auto max-w-[200px] mt-4" />
+        </section>
+      ) : null}
     </AppShell>
+  );
+}
+
+function Pill({ icon, children }: { icon: React.ReactNode; children: React.ReactNode }) {
+  return (
+    <span className="inline-flex items-center gap-1.5 bg-white/20 backdrop-blur-sm rounded-full px-3 py-1.5 border border-white/25">
+      {icon}
+      {children}
+    </span>
   );
 }

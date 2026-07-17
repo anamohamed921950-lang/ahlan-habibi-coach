@@ -14,6 +14,8 @@ export type Profile = {
   createdAt: string;
 };
 
+export type OnboardingDraft = Partial<Omit<Profile, "createdAt">>;
+
 export type DailyLog = {
   date: string;
   waterCups: number;
@@ -64,6 +66,8 @@ type State = {
   streak: number;
   lastActive: string | null;
   chat: ChatMsg[];
+  onboardingDraft: OnboardingDraft;
+  onboardingStep: number;
   setProfile: (p: Profile) => void;
   getToday: () => DailyLog;
   updateToday: (patch: Partial<DailyLog>) => void;
@@ -74,6 +78,9 @@ type State = {
   appendChat: (m: ChatMsg) => void;
   updateLastChat: (content: string) => void;
   resetChat: () => void;
+  updateOnboarding: (patch: OnboardingDraft) => void;
+  setOnboardingStep: (n: number) => void;
+  clearOnboarding: () => void;
   reset: () => void;
 };
 
@@ -119,6 +126,8 @@ export const useApp = create<State>()(
       streak: 0,
       lastActive: null,
       chat: [],
+      onboardingDraft: {},
+      onboardingStep: 0,
       setProfile: (profile) => set({ profile }),
       getToday: () => {
         const d = todayISO();
@@ -148,6 +157,10 @@ export const useApp = create<State>()(
         }
       },
       resetChat: () => set({ chat: [] }),
+      updateOnboarding: (patch) =>
+        set({ onboardingDraft: { ...get().onboardingDraft, ...patch } }),
+      setOnboardingStep: (n) => set({ onboardingStep: n }),
+      clearOnboarding: () => set({ onboardingDraft: {}, onboardingStep: 0 }),
       reset: () =>
         set({
           profile: null,
@@ -158,6 +171,8 @@ export const useApp = create<State>()(
           streak: 0,
           lastActive: null,
           chat: [],
+          onboardingDraft: {},
+          onboardingStep: 0,
         }),
     }),
     { name: "lc-app" },

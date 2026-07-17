@@ -5,9 +5,7 @@ import { useT } from "@/lib/i18n";
 import { AppShell } from "@/components/AppShell";
 import { ArrowLeft } from "lucide-react";
 
-export const Route = createFileRoute("/profile")({
-  component: EditProfile,
-});
+export const Route = createFileRoute("/profile")({ component: EditProfile });
 
 function EditProfile() {
   const { t, lang } = useT();
@@ -22,15 +20,8 @@ function EditProfile() {
   const [f, setF] = useState(
     () =>
       profile ?? {
-        name: "",
-        age: 40,
-        heightCm: 165,
-        weightKg: 85,
-        waistCm: 95,
-        goal: t.onboarding.goals[0],
-        activity: 1,
-        foods: "",
-        motivation: 7,
+        name: "", age: 40, heightCm: 165, weightKg: 85, waistCm: 95,
+        goal: t.onboarding.goals[0], activity: 1, foods: "", motivation: 7,
         createdAt: new Date().toISOString(),
       },
   );
@@ -39,50 +30,38 @@ function EditProfile() {
 
   return (
     <AppShell>
-      <div className="flex items-center gap-3 mb-6">
-        <button
-          onClick={() => nav({ to: "/" })}
-          className="p-2 -ms-2 rounded-full hover:bg-secondary"
-          aria-label={t.back}
-        >
-          <ArrowLeft className="w-5 h-5 rtl:rotate-180" />
+      <div className="flex items-center gap-3 mb-6 animate-fade-up">
+        <button onClick={() => nav({ to: "/" })}
+          className="w-10 h-10 rounded-full bg-card border border-border shadow-soft flex items-center justify-center"
+          aria-label={t.back}>
+          <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
         </button>
-        <h1 className="font-display text-2xl text-foreground">
-          {lang === "ar" ? "بياناتك" : "Your details"}
-        </h1>
+        <div>
+          <div className="text-[11px] uppercase tracking-widest text-primary/70 font-semibold">
+            {lang === "ar" ? "بياناتك" : "Your details"}
+          </div>
+          <h1 className="font-display text-3xl text-foreground leading-none mt-1">
+            {f.name || (lang === "ar" ? "جميلة" : "you")}
+          </h1>
+        </div>
       </div>
 
-      <div className="space-y-6 pb-28">
+      <div className="space-y-4 pb-40">
         <Field label={t.onboarding.name}>
-          <input
-            value={f.name}
-            onChange={(e) => setF({ ...f, name: e.target.value })}
-            placeholder={t.onboarding.namePh}
-            className="input"
-          />
+          <input value={f.name} onChange={(e) => setF({ ...f, name: e.target.value })} placeholder={t.onboarding.namePh} className="lc-input" />
         </Field>
-        <Field label={t.onboarding.age}>
-          <NumInput v={f.age} on={(v) => setF({ ...f, age: v })} />
-        </Field>
-        <Field label={t.onboarding.height}>
-          <NumInput v={f.heightCm} on={(v) => setF({ ...f, heightCm: v })} />
-        </Field>
-        <Field label={t.onboarding.weight}>
-          <NumInput v={f.weightKg} on={(v) => setF({ ...f, weightKg: v })} />
-        </Field>
-        <Field label={t.onboarding.waist}>
-          <NumInput v={f.waistCm} on={(v) => setF({ ...f, waistCm: v })} />
-        </Field>
+        <div className="grid grid-cols-2 gap-3">
+          <Field label={t.onboarding.age}><NumInput v={f.age} on={(v) => setF({ ...f, age: v })} /></Field>
+          <Field label={t.onboarding.height}><NumInput v={f.heightCm} on={(v) => setF({ ...f, heightCm: v })} /></Field>
+          <Field label={t.onboarding.weight}><NumInput v={f.weightKg} on={(v) => setF({ ...f, weightKg: v })} /></Field>
+          <Field label={t.onboarding.waist}><NumInput v={f.waistCm} on={(v) => setF({ ...f, waistCm: v })} /></Field>
+        </div>
 
         <Field label={t.onboarding.goal}>
           <div className="grid grid-cols-1 gap-2">
             {t.onboarding.goals.map((g) => (
-              <button
-                key={g}
-                type="button"
-                onClick={() => setF({ ...f, goal: g })}
-                className={`p-3 rounded-2xl text-start transition-all ${f.goal === g ? "bg-gradient-primary text-primary-foreground shadow-glow" : "bg-secondary text-secondary-foreground"}`}
-              >
+              <button key={g} type="button" onClick={() => setF({ ...f, goal: g })}
+                className={`p-3 rounded-2xl text-start transition-all border ${f.goal === g ? "bg-gradient-primary text-primary-foreground border-transparent shadow-glow" : "bg-card border-border"}`}>
                 {g}
               </button>
             ))}
@@ -92,12 +71,8 @@ function EditProfile() {
         <Field label={t.onboarding.activity}>
           <div className="grid grid-cols-2 gap-2">
             {t.onboarding.activities.map((a, i) => (
-              <button
-                key={a}
-                type="button"
-                onClick={() => setF({ ...f, activity: i })}
-                className={`p-3 rounded-2xl transition-all ${f.activity === i ? "bg-gradient-primary text-primary-foreground shadow-glow" : "bg-secondary text-secondary-foreground"}`}
-              >
+              <button key={a} type="button" onClick={() => setF({ ...f, activity: i })}
+                className={`p-3 rounded-2xl transition-all border ${f.activity === i ? "bg-gradient-primary text-primary-foreground border-transparent shadow-glow" : "bg-card border-border"}`}>
                 {a}
               </button>
             ))}
@@ -105,49 +80,29 @@ function EditProfile() {
         </Field>
 
         <Field label={t.onboarding.food}>
-          <input
-            value={f.foods}
-            onChange={(e) => setF({ ...f, foods: e.target.value })}
-            placeholder={t.onboarding.foodPh}
-            className="input"
-          />
+          <input value={f.foods} onChange={(e) => setF({ ...f, foods: e.target.value })} placeholder={t.onboarding.foodPh} className="lc-input" />
         </Field>
 
         <Field label={`${t.onboarding.motivation}: ${f.motivation}`}>
-          <input
-            type="range"
-            min={1}
-            max={10}
-            value={f.motivation}
+          <input type="range" min={1} max={10} value={f.motivation}
             onChange={(e) => setF({ ...f, motivation: Number(e.target.value) })}
-            className="w-full accent-[oklch(0.44_0.11_300)]"
-          />
+            className="w-full accent-[oklch(0.56_0.16_40)]" />
         </Field>
       </div>
 
-      <div className="fixed bottom-0 inset-x-0 p-5 bg-gradient-to-t from-background via-background/95 to-transparent">
+      <div className="fixed bottom-20 inset-x-0 p-5 bg-gradient-to-t from-background via-background/95 to-transparent">
         <div className="mx-auto max-w-md flex gap-3">
-          <button
-            onClick={() => nav({ to: "/" })}
-            className="flex-1 py-4 rounded-2xl bg-secondary text-secondary-foreground font-medium"
-          >
-            {lang === "ar" ? "إلغاء" : "Cancel"}
+          <button onClick={() => nav({ to: "/" })}
+            className="flex-1 py-4 rounded-2xl bg-card border border-border text-foreground font-medium">
+            {t.cancel}
           </button>
           <button
-            onClick={() => {
-              setProfile({ ...f, createdAt: profile.createdAt });
-              nav({ to: "/" });
-            }}
-            className="flex-[2] py-4 rounded-2xl bg-gradient-primary text-primary-foreground font-semibold shadow-glow active:scale-[0.98] transition-transform"
-          >
-            {lang === "ar" ? "حفظ" : "Save"}
+            onClick={() => { setProfile({ ...f, createdAt: profile.createdAt }); nav({ to: "/" }); }}
+            className="flex-[2] py-4 rounded-2xl bg-gradient-primary text-primary-foreground font-semibold shadow-glow active:scale-[0.98] transition-transform">
+            {t.save}
           </button>
         </div>
       </div>
-      <style>{`
-        .input { width:100%; padding:14px 16px; border-radius:1rem; background:var(--card); border:1px solid var(--border); font-size:16px; color:var(--foreground); outline:none; }
-        .input:focus { border-color: var(--primary); box-shadow: 0 0 0 3px color-mix(in oklab, var(--primary) 15%, transparent); }
-      `}</style>
     </AppShell>
   );
 }
@@ -155,19 +110,11 @@ function EditProfile() {
 function Field({ label, children }: { label: string; children: React.ReactNode }) {
   return (
     <div>
-      <label className="block text-sm font-display text-foreground mb-2">{label}</label>
+      <label className="block text-[11px] uppercase tracking-widest text-muted-foreground font-semibold mb-2 px-1">{label}</label>
       {children}
     </div>
   );
 }
 function NumInput({ v, on }: { v: number; on: (n: number) => void }) {
-  return (
-    <input
-      type="number"
-      value={v}
-      onChange={(e) => on(Number(e.target.value) || 0)}
-      className="input"
-      inputMode="numeric"
-    />
-  );
+  return <input type="number" value={v} onChange={(e) => on(Number(e.target.value) || 0)} className="lc-input" inputMode="numeric" />;
 }
