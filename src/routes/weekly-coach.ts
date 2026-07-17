@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { chatCompletion, gatewayError } from "@/lib/ai.server";
 
-export const Route = createFileRoute("/api/weekly-coach")({
+export const Route = createFileRoute("/weekly-coach")({
   server: {
     handlers: {
       POST: async ({ request }) => {

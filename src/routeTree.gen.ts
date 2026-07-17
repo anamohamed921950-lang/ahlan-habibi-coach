@@ -9,6 +9,8 @@
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
 import { Route as rootRouteImport } from './routes/__root'
+import { Route as WeeklyCoachRouteImport } from './routes/weekly-coach'
+import { Route as ProfileRouteImport } from './routes/profile'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MealRouteImport } from './routes/meal'
 import { Route as InsightsRouteImport } from './routes/insights'
@@ -19,6 +21,16 @@ import { Route as ApiDailyCoachRouteImport } from './routes/api/daily-coach'
 import { Route as ApiChatRouteImport } from './routes/api/chat'
 import { Route as ApiAnalyzeMealRouteImport } from './routes/api/analyze-meal'
 
+const WeeklyCoachRoute = WeeklyCoachRouteImport.update({
+  id: '/weekly-coach',
+  path: '/weekly-coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const ProfileRoute = ProfileRouteImport.update({
+  id: '/profile',
+  path: '/profile',
+  getParentRoute: () => rootRouteImport,
+} as any)
 const OnboardingRoute = OnboardingRouteImport.update({
   id: '/onboarding',
   path: '/onboarding',
@@ -72,6 +84,8 @@ export interface FileRoutesByFullPath {
   '/insights': typeof InsightsRoute
   '/meal': typeof MealRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
+  '/weekly-coach': typeof WeeklyCoachRoute
   '/api/analyze-meal': typeof ApiAnalyzeMealRoute
   '/api/chat': typeof ApiChatRoute
   '/api/daily-coach': typeof ApiDailyCoachRoute
@@ -83,6 +97,8 @@ export interface FileRoutesByTo {
   '/insights': typeof InsightsRoute
   '/meal': typeof MealRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
+  '/weekly-coach': typeof WeeklyCoachRoute
   '/api/analyze-meal': typeof ApiAnalyzeMealRoute
   '/api/chat': typeof ApiChatRoute
   '/api/daily-coach': typeof ApiDailyCoachRoute
@@ -95,6 +111,8 @@ export interface FileRoutesById {
   '/insights': typeof InsightsRoute
   '/meal': typeof MealRoute
   '/onboarding': typeof OnboardingRoute
+  '/profile': typeof ProfileRoute
+  '/weekly-coach': typeof WeeklyCoachRoute
   '/api/analyze-meal': typeof ApiAnalyzeMealRoute
   '/api/chat': typeof ApiChatRoute
   '/api/daily-coach': typeof ApiDailyCoachRoute
@@ -108,6 +126,8 @@ export interface FileRouteTypes {
     | '/insights'
     | '/meal'
     | '/onboarding'
+    | '/profile'
+    | '/weekly-coach'
     | '/api/analyze-meal'
     | '/api/chat'
     | '/api/daily-coach'
@@ -119,6 +139,8 @@ export interface FileRouteTypes {
     | '/insights'
     | '/meal'
     | '/onboarding'
+    | '/profile'
+    | '/weekly-coach'
     | '/api/analyze-meal'
     | '/api/chat'
     | '/api/daily-coach'
@@ -130,6 +152,8 @@ export interface FileRouteTypes {
     | '/insights'
     | '/meal'
     | '/onboarding'
+    | '/profile'
+    | '/weekly-coach'
     | '/api/analyze-meal'
     | '/api/chat'
     | '/api/daily-coach'
@@ -142,6 +166,8 @@ export interface RootRouteChildren {
   InsightsRoute: typeof InsightsRoute
   MealRoute: typeof MealRoute
   OnboardingRoute: typeof OnboardingRoute
+  ProfileRoute: typeof ProfileRoute
+  WeeklyCoachRoute: typeof WeeklyCoachRoute
   ApiAnalyzeMealRoute: typeof ApiAnalyzeMealRoute
   ApiChatRoute: typeof ApiChatRoute
   ApiDailyCoachRoute: typeof ApiDailyCoachRoute
@@ -149,6 +175,20 @@ export interface RootRouteChildren {
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
+    '/weekly-coach': {
+      id: '/weekly-coach'
+      path: '/weekly-coach'
+      fullPath: '/weekly-coach'
+      preLoaderRoute: typeof WeeklyCoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/profile': {
+      id: '/profile'
+      path: '/profile'
+      fullPath: '/profile'
+      preLoaderRoute: typeof ProfileRouteImport
+      parentRoute: typeof rootRouteImport
+    }
     '/onboarding': {
       id: '/onboarding'
       path: '/onboarding'
@@ -222,6 +262,8 @@ const rootRouteChildren: RootRouteChildren = {
   InsightsRoute: InsightsRoute,
   MealRoute: MealRoute,
   OnboardingRoute: OnboardingRoute,
+  ProfileRoute: ProfileRoute,
+  WeeklyCoachRoute: WeeklyCoachRoute,
   ApiAnalyzeMealRoute: ApiAnalyzeMealRoute,
   ApiChatRoute: ApiChatRoute,
   ApiDailyCoachRoute: ApiDailyCoachRoute,
