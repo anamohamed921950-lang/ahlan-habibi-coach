@@ -13,6 +13,7 @@ import { Route as WeeklyCoachRouteImport } from './routes/weekly-coach'
 import { Route as PlanRouteImport } from './routes/plan'
 import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MealRouteImport } from './routes/meal'
+import { Route as InsightsRouteImport } from './routes/insights'
 import { Route as HabitsRouteImport } from './routes/habits'
 import { Route as CoachRouteImport } from './routes/coach'
 import { Route as IndexRouteImport } from './routes/index'
@@ -38,6 +39,11 @@ const OnboardingRoute = OnboardingRouteImport.update({
 const MealRoute = MealRouteImport.update({
   id: '/meal',
   path: '/meal',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const InsightsRoute = InsightsRouteImport.update({
+  id: '/insights',
+  path: '/insights',
   getParentRoute: () => rootRouteImport,
 } as any)
 const HabitsRoute = HabitsRouteImport.update({
@@ -75,6 +81,7 @@ export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
   '/coach': typeof CoachRoute
   '/habits': typeof HabitsRoute
+  '/insights': typeof InsightsRoute
   '/meal': typeof MealRoute
   '/onboarding': typeof OnboardingRoute
   '/plan': typeof PlanRoute
@@ -87,6 +94,7 @@ export interface FileRoutesByTo {
   '/': typeof IndexRoute
   '/coach': typeof CoachRoute
   '/habits': typeof HabitsRoute
+  '/insights': typeof InsightsRoute
   '/meal': typeof MealRoute
   '/onboarding': typeof OnboardingRoute
   '/plan': typeof PlanRoute
@@ -100,6 +108,7 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/coach': typeof CoachRoute
   '/habits': typeof HabitsRoute
+  '/insights': typeof InsightsRoute
   '/meal': typeof MealRoute
   '/onboarding': typeof OnboardingRoute
   '/plan': typeof PlanRoute
@@ -114,6 +123,7 @@ export interface FileRouteTypes {
     | '/'
     | '/coach'
     | '/habits'
+    | '/insights'
     | '/meal'
     | '/onboarding'
     | '/plan'
@@ -126,6 +136,7 @@ export interface FileRouteTypes {
     | '/'
     | '/coach'
     | '/habits'
+    | '/insights'
     | '/meal'
     | '/onboarding'
     | '/plan'
@@ -138,6 +149,7 @@ export interface FileRouteTypes {
     | '/'
     | '/coach'
     | '/habits'
+    | '/insights'
     | '/meal'
     | '/onboarding'
     | '/plan'
@@ -151,6 +163,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   CoachRoute: typeof CoachRoute
   HabitsRoute: typeof HabitsRoute
+  InsightsRoute: typeof InsightsRoute
   MealRoute: typeof MealRoute
   OnboardingRoute: typeof OnboardingRoute
   PlanRoute: typeof PlanRoute
@@ -188,6 +201,13 @@ declare module '@tanstack/react-router' {
       path: '/meal'
       fullPath: '/meal'
       preLoaderRoute: typeof MealRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/insights': {
+      id: '/insights'
+      path: '/insights'
+      fullPath: '/insights'
+      preLoaderRoute: typeof InsightsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/habits': {
@@ -239,6 +259,7 @@ const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   CoachRoute: CoachRoute,
   HabitsRoute: HabitsRoute,
+  InsightsRoute: InsightsRoute,
   MealRoute: MealRoute,
   OnboardingRoute: OnboardingRoute,
   PlanRoute: PlanRoute,
