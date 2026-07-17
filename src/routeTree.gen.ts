@@ -10,6 +10,7 @@
 
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as WeeklyCoachRouteImport } from './routes/weekly-coach'
+import { Route as OnboardingRouteImport } from './routes/onboarding'
 import { Route as MealRouteImport } from './routes/meal'
 import { Route as CoachRouteImport } from './routes/coach'
 import { Route as ApiDailyCoachRouteImport } from './routes/api/daily-coach'
@@ -19,6 +20,11 @@ import { Route as ApiAnalyzeMealRouteImport } from './routes/api/analyze-meal'
 const WeeklyCoachRoute = WeeklyCoachRouteImport.update({
   id: '/weekly-coach',
   path: '/weekly-coach',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const OnboardingRoute = OnboardingRouteImport.update({
+  id: '/onboarding',
+  path: '/onboarding',
   getParentRoute: () => rootRouteImport,
 } as any)
 const MealRoute = MealRouteImport.update({
@@ -50,6 +56,7 @@ const ApiAnalyzeMealRoute = ApiAnalyzeMealRouteImport.update({
 export interface FileRoutesByFullPath {
   '/coach': typeof CoachRoute
   '/meal': typeof MealRoute
+  '/onboarding': typeof OnboardingRoute
   '/weekly-coach': typeof WeeklyCoachRoute
   '/api/analyze-meal': typeof ApiAnalyzeMealRoute
   '/api/chat': typeof ApiChatRoute
@@ -58,6 +65,7 @@ export interface FileRoutesByFullPath {
 export interface FileRoutesByTo {
   '/coach': typeof CoachRoute
   '/meal': typeof MealRoute
+  '/onboarding': typeof OnboardingRoute
   '/weekly-coach': typeof WeeklyCoachRoute
   '/api/analyze-meal': typeof ApiAnalyzeMealRoute
   '/api/chat': typeof ApiChatRoute
@@ -67,6 +75,7 @@ export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/coach': typeof CoachRoute
   '/meal': typeof MealRoute
+  '/onboarding': typeof OnboardingRoute
   '/weekly-coach': typeof WeeklyCoachRoute
   '/api/analyze-meal': typeof ApiAnalyzeMealRoute
   '/api/chat': typeof ApiChatRoute
@@ -77,6 +86,7 @@ export interface FileRouteTypes {
   fullPaths:
     | '/coach'
     | '/meal'
+    | '/onboarding'
     | '/weekly-coach'
     | '/api/analyze-meal'
     | '/api/chat'
@@ -85,6 +95,7 @@ export interface FileRouteTypes {
   to:
     | '/coach'
     | '/meal'
+    | '/onboarding'
     | '/weekly-coach'
     | '/api/analyze-meal'
     | '/api/chat'
@@ -93,6 +104,7 @@ export interface FileRouteTypes {
     | '__root__'
     | '/coach'
     | '/meal'
+    | '/onboarding'
     | '/weekly-coach'
     | '/api/analyze-meal'
     | '/api/chat'
@@ -102,6 +114,7 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   CoachRoute: typeof CoachRoute
   MealRoute: typeof MealRoute
+  OnboardingRoute: typeof OnboardingRoute
   WeeklyCoachRoute: typeof WeeklyCoachRoute
   ApiAnalyzeMealRoute: typeof ApiAnalyzeMealRoute
   ApiChatRoute: typeof ApiChatRoute
@@ -115,6 +128,13 @@ declare module '@tanstack/react-router' {
       path: '/weekly-coach'
       fullPath: '/weekly-coach'
       preLoaderRoute: typeof WeeklyCoachRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/onboarding': {
+      id: '/onboarding'
+      path: '/onboarding'
+      fullPath: '/onboarding'
+      preLoaderRoute: typeof OnboardingRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/meal': {
@@ -158,6 +178,7 @@ declare module '@tanstack/react-router' {
 const rootRouteChildren: RootRouteChildren = {
   CoachRoute: CoachRoute,
   MealRoute: MealRoute,
+  OnboardingRoute: OnboardingRoute,
   WeeklyCoachRoute: WeeklyCoachRoute,
   ApiAnalyzeMealRoute: ApiAnalyzeMealRoute,
   ApiChatRoute: ApiChatRoute,
