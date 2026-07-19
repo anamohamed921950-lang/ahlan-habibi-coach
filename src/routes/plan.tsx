@@ -1,11 +1,10 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
 import { useEffect, useState, useCallback } from "react";
 import { AppShell } from "@/components/AppShell";
 import { useApp } from "@/lib/store";
 import type { WeekDayPlan } from "@/lib/store";
 import { useT } from "@/lib/i18n";
 import { lifestyleScore, level, xpToNext } from "@/lib/health";
-import { Link, useRouter } from "@tanstack/react-router";
 import { Droplet, Footprints, Loader2, Sparkles, CalendarDays, ArrowLeft, RefreshCw, Flame, Target, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/plan")({ component: PlanPage });
