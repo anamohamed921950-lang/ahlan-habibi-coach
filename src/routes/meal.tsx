@@ -12,6 +12,7 @@ export const Route = createFileRoute("/meal")({ component: MealPage });
 function MealPage() {
   const { t, lang } = useT();
   const addXp = useApp((s) => s.addXp);
+  const setLastMeal = useApp((s) => s.setLastMeal);
   const [image, setImage] = useState<string | null>(null);
   const [result, setResult] = useState<string>("");
   const [busy, setBusy] = useState(false);
@@ -38,6 +39,7 @@ function MealPage() {
       const j = (await res.json()) as { text: string };
       setResult(j.text);
       addXp(10);
+      setLastMeal({ text: j.text, date: new Date().toISOString() });
     } catch (e) {
       toast.error(e instanceof Error ? e.message : "Error");
     } finally { setBusy(false); }

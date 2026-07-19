@@ -15,16 +15,20 @@ function CoachPage() {
   const appendChat = useApp((s) => s.appendChat);
   const updateLastChat = useApp((s) => s.updateLastChat);
   const profile = useApp((s) => s.profile);
+  const logs = useApp((s) => s.logs);
+  const lastMeal = useApp((s) => s.lastMeal);
   const [input, setInput] = useState("");
   const [busy, setBusy] = useState(false);
   const scrollRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => { scrollRef.current?.scrollTo({ top: 999999, behavior: "smooth" }); }, [chat, busy]);
 
-  const send = async () => {
-    const text = input.trim();
+  const recentLogs = Object.keys(logs).sort().slice(-3).map((k) => logs[k]);
+
+  const send = async (override?: string) => {
+    const text = (override ?? input).trim();
     if (!text || busy) return;
-    setInput("");
+    if (!override) setInput("");
     setBusy(true);
     const nextMsgs = [...chat, { role: "user" as const, content: text }];
     appendChat({ role: "user", content: text });
@@ -34,7 +38,7 @@ function CoachPage() {
       const res = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ messages: nextMsgs, lang, profile }),
+        body: JSON.stringify({ messages: nextMsgs, lang, profile, recentLogs, lastMeal }),
       });
       if (!res.ok || !res.body) throw new Error(await res.text());
 
@@ -68,6 +72,11 @@ function CoachPage() {
     }
   };
 
+  const suggestions: string[] = [];
+  if (lastMeal) suggestions.push(t.followUpMeal);
+  if (recentLogs.length) suggestions.push(t.followUpHabit);
+  suggestions.push(t.followUpNextStep);
+
   return (
     <AppShell>
       <div ref={scrollRef} className="pb-32 -mx-2 overflow-y-auto max-h-[calc(100vh-190px)]">
@@ -89,6 +98,24 @@ function CoachPage() {
             )}
           </div>
         ))}
+        {!busy && suggestions.length > 0 && (
+          <div className="px-2 mt-2">
+            <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-2">
+              {t.followUps}
+            </div>
+            <div className="flex flex-wrap gap-2">
+              {suggestions.map((s) => (
+                <button
+                  key={s}
+                  onClick={() => send(s)}
+                  className="px-3 py-1.5 rounded-full bg-card border border-border text-xs text-foreground hover:border-primary/50 active:scale-95 transition"
+                >
+                  {s}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
       </div>
 
       <div className="fixed bottom-16 inset-x-0 p-3 bg-gradient-to-t from-background via-background/95 to-transparent">
@@ -101,7 +128,7 @@ function CoachPage() {
             placeholder={t.chatPlaceholder}
             className="flex-1 resize-none px-4 py-3 rounded-2xl bg-card border border-border focus:border-primary outline-none text-[15px]"
           />
-          <button onClick={send} disabled={busy || !input.trim()}
+          <button onClick={() => send()} disabled={busy || !input.trim()}
             className="w-12 h-12 rounded-2xl bg-gradient-primary text-primary-foreground flex items-center justify-center shadow-glow disabled:opacity-40 active:scale-95">
             <Send className="w-5 h-5 rtl:-scale-x-100" />
           </button>

@@ -1,10 +1,11 @@
-import { createFileRoute } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { createFileRoute, Link, useRouter } from "@tanstack/react-router";
+import { useEffect, useState, useCallback } from "react";
 import { AppShell } from "@/components/AppShell";
 import { useApp } from "@/lib/store";
 import type { WeekDayPlan } from "@/lib/store";
 import { useT } from "@/lib/i18n";
-import { Droplet, Footprints, Loader2, Sparkles, CalendarDays } from "lucide-react";
+import { lifestyleScore, level, xpToNext } from "@/lib/health";
+import { Droplet, Footprints, Loader2, Sparkles, CalendarDays, ArrowLeft, RefreshCw, Flame, Target, ArrowRight } from "lucide-react";
 
 export const Route = createFileRoute("/plan")({ component: PlanPage });
 
@@ -37,7 +38,12 @@ const FALLBACK_EN: WeekDayPlan[] = [
 
 function PlanPage() {
   const { t, lang } = useT();
+  const router = useRouter();
   const profile = useApp((s) => s.profile);
+  const logs = useApp((s) => s.logs);
+  const lastMeal = useApp((s) => s.lastMeal);
+  const xp = useApp((s) => s.xp);
+  const streak = useApp((s) => s.streak);
   const weeklyPlans = useApp((s) => s.weeklyPlans);
   const saveWeeklyPlan = useApp((s) => s.saveWeeklyPlan);
 
@@ -46,15 +52,17 @@ function PlanPage() {
   const [loading, setLoading] = useState(false);
   const [openIdx, setOpenIdx] = useState<number>(new Date().getDay() === 0 ? 6 : new Date().getDay() - 1);
 
-  useEffect(() => {
-    if (!profile || week) return;
+  const generate = useCallback((force = false) => {
+    if (!profile) return;
+    if (!force && week) return;
+    const recentLogs = Object.keys(logs).sort().slice(-7).map((k) => logs[k]);
     setLoading(true);
     const controller = new AbortController();
     const timeoutId = setTimeout(() => controller.abort(), 12000);
     fetch("/api/weekly-coach", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ lang, profile }),
+      body: JSON.stringify({ lang, profile, recentLogs, lastMeal }),
       signal: controller.signal,
     })
       .then(async (r) => {
@@ -72,7 +80,26 @@ function PlanPage() {
         clearTimeout(timeoutId);
         setLoading(false);
       });
-  }, [profile, lang, weekKey, week, saveWeeklyPlan]);
+  }, [profile, lang, weekKey, week, saveWeeklyPlan, logs, lastMeal]);
+
+  useEffect(() => { generate(false); }, [generate]);
+
+  // Weekly progress: count days in current week with any activity + avg score
+  const weekLogs = Object.keys(logs)
+    .filter((k) => k >= weekKey)
+    .map((k) => logs[k]);
+  const daysLogged = weekLogs.filter(
+    (l) => l.waterCups || l.steps || l.sleepHours || l.exercise || l.veggies || l.proteins,
+  ).length;
+  const avgScore = weekLogs.length
+    ? Math.round(weekLogs.reduce((s, l) => s + lifestyleScore(l), 0) / weekLogs.length)
+    : 0;
+  const completionPct = Math.round((daysLogged / 7) * 100);
+  const lv = level(xp);
+  const prog = xpToNext(xp);
+
+  const todayIdx = new Date().getDay() === 0 ? 6 : new Date().getDay() - 1;
+  const todayPlan = week?.[todayIdx];
 
   const monday = new Date(weekKey);
   const rangeStr = (() => {
@@ -85,13 +112,70 @@ function PlanPage() {
 
   return (
     <AppShell>
-      <div className="mb-6 animate-fade-up">
-        <div className="text-[11px] uppercase tracking-widest text-primary/70 font-semibold inline-flex items-center gap-1.5">
-          <CalendarDays className="w-3 h-3" /> {t.weekPlan}
+      <div className="mb-4 flex items-start gap-3 animate-fade-up">
+        <button
+          onClick={() => router.history.back()}
+          className="w-10 h-10 rounded-full bg-card border border-border shadow-soft flex items-center justify-center text-foreground shrink-0"
+          aria-label={t.back}
+        >
+          <ArrowLeft className="w-4 h-4 rtl:rotate-180" />
+        </button>
+        <div className="flex-1">
+          <div className="text-[11px] uppercase tracking-widest text-primary/70 font-semibold inline-flex items-center gap-1.5">
+            <CalendarDays className="w-3 h-3" /> {t.weekPlan}
+          </div>
+          <h1 className="font-display text-3xl text-foreground mt-1 leading-none">{t.plan}</h1>
+          <p className="mt-1 text-xs text-muted-foreground">{rangeStr}</p>
         </div>
-        <h1 className="font-display text-4xl text-foreground mt-1 leading-none">{t.plan}</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{rangeStr}</p>
+        <button
+          onClick={() => generate(true)}
+          disabled={loading}
+          className="h-10 px-3 rounded-full bg-card border border-border shadow-soft inline-flex items-center gap-1.5 text-xs text-primary font-semibold disabled:opacity-50"
+          aria-label={t.regenerate}
+        >
+          <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
+          <span className="hidden sm:inline">{loading ? t.regenerating : t.regenerate}</span>
+        </button>
       </div>
+
+      {/* Weekly progress */}
+      <section className="mb-4 p-4 rounded-3xl bg-card border border-border shadow-soft animate-fade-up">
+        <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold mb-3">
+          {t.weeklyProgress}
+        </div>
+        <div className="grid grid-cols-3 gap-2 mb-3">
+          <ProgTile label={t.streak} value={streak} icon={<Flame className="w-3.5 h-3.5" />} />
+          <ProgTile label={t.daysLogged} value={`${daysLogged}/7`} icon={<Target className="w-3.5 h-3.5" />} />
+          <ProgTile label={t.avgScore} value={avgScore} icon={<Sparkles className="w-3.5 h-3.5" />} />
+        </div>
+        <div className="flex items-center justify-between text-[10px] text-muted-foreground mb-1">
+          <span>{t.level} {lv}</span>
+          <span className="num">{xp} {t.xp}</span>
+        </div>
+        <div className="h-1.5 bg-secondary/70 rounded-full overflow-hidden">
+          <div className="h-full bg-gradient-gold transition-all duration-700" style={{ width: `${completionPct || prog.pct}%` }} />
+        </div>
+      </section>
+
+      {/* Next action */}
+      {todayPlan ? (
+        <Link to="/habits" className="block mb-4 p-4 rounded-3xl bg-gradient-sunset text-primary-foreground shadow-glow animate-fade-up">
+          <div className="text-[10px] uppercase tracking-widest opacity-90 font-semibold inline-flex items-center gap-1.5">
+            <Sparkles className="w-3 h-3" /> {t.nextAction}
+          </div>
+          <p className="mt-1.5 font-display text-lg leading-snug text-balance">{todayPlan.mission}</p>
+          <div className="mt-2 flex items-center justify-between text-[11px] opacity-90">
+            <span>{todayPlan.tinyHabit}</span>
+            <ArrowRight className="w-3.5 h-3.5 rtl:rotate-180" />
+          </div>
+        </Link>
+      ) : null}
+
+      {(Object.keys(logs).length > 0 || lastMeal) && (
+        <div className="mb-3 text-[10px] text-primary/70 font-semibold inline-flex items-center gap-1 px-1">
+          <Sparkles className="w-3 h-3" /> {t.personalizedFor}
+        </div>
+      )}
 
       {loading && !week ? (
         <div className="p-8 rounded-3xl bg-card border border-border flex items-center justify-center gap-2 text-muted-foreground">
@@ -152,6 +236,18 @@ function PlanPage() {
         </div>
       )}
     </AppShell>
+  );
+}
+
+function ProgTile({ label, value, icon }: { label: string; value: React.ReactNode; icon: React.ReactNode }) {
+  return (
+    <div className="p-2.5 rounded-2xl bg-secondary/60 text-center">
+      <div className="text-[10px] uppercase tracking-widest text-muted-foreground font-semibold inline-flex items-center gap-1">
+        {icon}
+        {label}
+      </div>
+      <div className="mt-0.5 font-display text-xl text-primary num">{value}</div>
+    </div>
   );
 }
 

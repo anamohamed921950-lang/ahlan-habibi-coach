@@ -57,6 +57,8 @@ export type WeeklyPlan = {
 
 export type ChatMsg = { role: "user" | "assistant"; content: string };
 
+export type LastMeal = { text: string; date: string; thumb?: string };
+
 type State = {
   profile: Profile | null;
   logs: Record<string, DailyLog>;
@@ -66,6 +68,7 @@ type State = {
   streak: number;
   lastActive: string | null;
   chat: ChatMsg[];
+  lastMeal: LastMeal | null;
   onboardingDraft: OnboardingDraft;
   onboardingStep: number;
   setProfile: (p: Profile) => void;
@@ -78,6 +81,7 @@ type State = {
   appendChat: (m: ChatMsg) => void;
   updateLastChat: (content: string) => void;
   resetChat: () => void;
+  setLastMeal: (m: LastMeal) => void;
   updateOnboarding: (patch: OnboardingDraft) => void;
   setOnboardingStep: (n: number) => void;
   clearOnboarding: () => void;
@@ -126,6 +130,7 @@ export const useApp = create<State>()(
       streak: 0,
       lastActive: null,
       chat: [],
+      lastMeal: null,
       onboardingDraft: {},
       onboardingStep: 0,
       setProfile: (profile) => set({ profile }),
@@ -157,6 +162,7 @@ export const useApp = create<State>()(
         }
       },
       resetChat: () => set({ chat: [] }),
+      setLastMeal: (m) => set({ lastMeal: m }),
       updateOnboarding: (patch) =>
         set({ onboardingDraft: { ...get().onboardingDraft, ...patch } }),
       setOnboardingStep: (n) => set({ onboardingStep: n }),
@@ -171,6 +177,7 @@ export const useApp = create<State>()(
           streak: 0,
           lastActive: null,
           chat: [],
+          lastMeal: null,
           onboardingDraft: {},
           onboardingStep: 0,
         }),
